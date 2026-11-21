@@ -295,6 +295,8 @@ main{padding:14px 14px calc(var(--tabh) + 22px);max-width:1280px;margin:0 auto}
 .rtag{display:inline-block;margin-top:7px;font-size:11px;font-weight:900;padding:2px 7px;border-radius:7px;background:var(--accentSoft);color:var(--accent2)}
 [data-theme="dark"] .rtag{color:var(--accent)}
 .rtag.mine{background:var(--warnSoft);color:var(--warn)}
+.remoji.hasimg{width:66px;height:88px;padding:0;overflow:hidden;border-radius:16px;background:var(--card2)}
+.remoji.hasimg img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
 
 /* recipe detail */
 .detailview{
@@ -310,6 +312,15 @@ main{padding:14px 14px calc(var(--tabh) + 22px);max-width:1280px;margin:0 auto}
 .rhero .remoji{width:68px;height:68px;font-size:34px;border-radius:20px}
 .rhero h2{font-size:22px;font-weight:900;letter-spacing:-.6px;line-height:1.2}
 .rhero .rsub{font-size:13px;font-weight:800;color:var(--muted);margin-top:4px}
+.rphoto{margin:2px 0 14px;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:var(--card2);box-shadow:var(--shadow);cursor:zoom-in;position:relative}
+.rphoto img{display:block;width:100%;height:auto;max-height:46vh;object-fit:cover;object-position:top center}
+.rphoto figcaption{padding:7px 12px;font-size:12px;font-weight:900;color:var(--muted);background:var(--card);border-top:1px solid var(--line);text-align:center}
+.rphoto:active{transform:scale(.995)}
+/* recipe photo zoom */
+.zoomview{position:fixed;inset:0;z-index:70;background:rgba(4,12,9,.94);display:none;align-items:flex-start;justify-content:center;overflow:auto;-webkit-overflow-scrolling:touch;padding:calc(12px + env(safe-area-inset-top)) 10px calc(24px + env(safe-area-inset-bottom))}
+.zoomview.on{display:flex}
+.zoomview img{display:block;width:auto;max-width:100%;height:auto;border-radius:14px;background:#fff}
+.zoomview .zclose{position:fixed;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:71;width:44px;height:44px;border-radius:14px;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.55);color:#fff;font-size:19px;font-weight:900;display:grid;place-items:center}
 .servpick{display:flex;gap:7px;align-items:center;margin:6px 0 14px;flex-wrap:wrap}
 .inglist li{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
 .inglist li:first-child{border-top:none}
@@ -666,6 +677,12 @@ input[type="checkbox"]:checked::after{content:"✓";position:absolute;inset:0;di
     <button class="iconbtn" id="detailEdit" type="button" aria-label="수정">✏️</button>
   </div>
   <div class="dbody" id="detailBody"></div>
+</div>
+
+<!-- ================= 레시피 카드 확대 ================= -->
+<div class="zoomview" id="zoomView" role="dialog" aria-modal="true" aria-label="레시피 카드 크게 보기">
+  <button class="zclose" id="zoomClose" type="button" aria-label="닫기">✕</button>
+  <img id="zoomImg" alt="">
 </div>
 
 <!-- ================= 탭바 ================= -->
@@ -1704,6 +1721,124 @@ const BUILTIN_RECIPES = [
       '국물은 맑은 황금빛이 정석. 간장은 색이 확 어두워지지 않을 만큼만 넣어요.',
       '완뚝으로 냄비째 다음 날 데워 먹으면 더 깊어요.'
     ]
+  },
+  {
+    id: 'b_suyuk_soju', builtin: true, emoji: '🥘', img: './recipes/suyuk-soju.png',
+    name: '기본 된장+소주 수육',
+    sub: '650g 황금 레시피 · 잡내 제로 · 야들야들 촉촉',
+    time: '1시간 (뜸 10분 포함)', servings: 2,
+    ings: [
+      {n:'통삼겹살', q:650, u:'g', note:'수육용 통삼겹 · 칼집 살짝'},
+      {n:'된장', q:2, u:'큰술', note:'약 40g · 잡내를 잡고 살을 부드럽게'},
+      {n:'양파', q:1, u:'개'},
+      {n:'대파', q:1, u:'대'},
+      {n:'통마늘', q:8, u:'쪽'},
+      {n:'커피가루', q:1, u:'작은술', note:'인스턴트 커피 가루'},
+      {n:'월계수잎', q:3, u:'장'},
+      {n:'통후추', q:10, u:'알'},
+      {n:'물', q:1200, u:'ml', note:'고기 잠길 정도'},
+      {n:'소주', q:50, u:'ml', note:'반 컵 · 50~100ml'}
+    ],
+    steps: [
+      '냄비에 물 1.2L·양파·대파·통마늘·된장·커피가루·월계수잎·통후추를 넣고 팔팔 끓어요.',
+      '물이 끓으면 통삼겹 650g와 소주 50~100ml를 넣고 뚜껑을 열어 센불에서 10분 삶아 잡내를 날려요.',
+      '뚜껑을 닫고 중약불로 줄여 35~40분 푹 삶아요.',
+      '불을 끄고 뚜껑을 덮은 채 10분 뜸 들여 육즙을 가둬요.'
+    ],
+    tips: [
+      '젓가락으로 찔러 핏물이 안 나오면 완성! 한 김 식혀 썰면 안 부서져요.',
+      '된장 2큰술이 잡내를 잡고 살을 부드럽게 해요. 소주는 50~100ml 사이면 돼요.',
+      '커피가루는 향이 남지 않으면서 잡내만 잡아줘요. 없으면 생략해도 돼요.',
+      '650g이 2~3인분이라 3인분은 ×1.5(975g), 4인분은 ×2(1.3kg)로 늘리면 돼요.'
+    ]
+  },
+  {
+    id: 'b_suyuk_nowater', builtin: true, emoji: '🧅', img: './recipes/suyuk-no-water.png',
+    name: '무수분 수육',
+    sub: '물 한 방울 없이 · 진한 채소 육즙',
+    time: '1시간 10분 (뜸 10분 포함)', servings: 2,
+    ings: [
+      {n:'통삼겹살', q:650, u:'g', note:'칼집 살짝 내기'},
+      {n:'양파', q:2, u:'개', note:'두껍게 슬라이스'},
+      {n:'대파', q:2, u:'대'},
+      {n:'통마늘', q:10, u:'쪽'},
+      {n:'사과', q:0.5, u:'개', note:'선택 · 없으면 생략'},
+      {n:'소주', q:50, u:'ml', note:'반 컵'},
+      {n:'월계수잎', q:3, u:'장'},
+      {n:'통후추', q:10, u:'알'},
+      {n:'된장', q:0.5, u:'큰술', note:'고기 겉면에 살짝'}
+    ],
+    steps: [
+      '냄비 바닥에 양파·대파·사과를 듬뿍 깔아요. 채소가 물을 대신해요.',
+      '된장을 살짝 바른 통삼겹 650g과 통마늘·월계수잎·통후추를 올려요.',
+      '소주 50ml만 두르고 뚜껑을 닫아 중불 5분 → 약불 45분 삶아요.',
+      '불을 끄고 뚜껑을 열지 않은 채 10분 뜸 들여요.'
+    ],
+    tips: [
+      '채소 수분이 나와 <b>절다 안 타요</b>. 40분쯤 한 번만 살짝 뒤집어 주세요.',
+      '사과 반 개는 단맛과 연육 효과를 더해요. 없으면 생략해도 맛이 좋아요.',
+      '된장 반 큰술은 겉면에만 살짝 — 많이 바르면 짜져요.',
+      '650g이 2~3인분 기준이에요. 양파를 넉넉히 깔아야 바닥이 눌지 않아요.'
+    ]
+  },
+  {
+    id: 'b_suyuk_hanbang', builtin: true, emoji: '🍶', img: './recipes/suyuk-hanbang.png',
+    name: '한방 수육',
+    sub: '진한 한약재 풍미 · 족발 느낌 쫀득함',
+    time: '1시간 (뜸 10분 포함)', servings: 2,
+    ings: [
+      {n:'통삼겹살', q:650, u:'g'},
+      {n:'쌍화탕', q:1, u:'병', note:'또는 한방티백 1개'},
+      {n:'진간장', q:4, u:'큰술'},
+      {n:'된장', q:1, u:'큰술'},
+      {n:'설탕', q:2, u:'큰술', note:'물엿으로 대체 가능'},
+      {n:'소주', q:50, u:'ml', note:'반 컵 · 50~100ml'},
+      {n:'커피가루', q:1, u:'작은술'},
+      {n:'양파', q:1, u:'개'},
+      {n:'대파', q:1, u:'대'},
+      {n:'통마늘', q:8, u:'쪽'},
+      {n:'물', q:1000, u:'ml'}
+    ],
+    steps: [
+      '냄비에 물 1L·쌍화탕 1병·간장·된장·설탕·채소·커피가루를 넣고 끓어요.',
+      '팔팔 끓으면 통삼겹 650g와 소주를 넣고 뚜껑을 열어 센불 10분 삶아요.',
+      '뚜껑을 닫고 중약불로 줄여 35~40분 은근하게 삶아요.',
+      '불을 끄고 뚜껑을 덮어 10분 뜸 들여요.'
+    ],
+    tips: [
+      '쌍화탕 한 병만 넣어도 전문점 한방 보쌈 맛 완성! 색이 진해 먹음직스러워요.',
+      '쌍화탕이 없으면 한방티백 1개로 대신해요. 계피·대추를 조금 넣어도 좋아요.',
+      '브랜드마다 단맛이 달라 마지막에 국물로 간을 봐요. 짜면 물을 조금 더 넣어요.'
+    ]
+  },
+  {
+    id: 'b_suyuk_cola', builtin: true, emoji: '🥤', img: './recipes/suyuk-cola.png',
+    name: '콜라 수육',
+    sub: '단짠 감칠맛 · 연육 효과 최고',
+    time: '1시간 (뜸 10분 포함)', servings: 2,
+    ings: [
+      {n:'통삼겹살', q:650, u:'g'},
+      {n:'콜라', q:500, u:'ml', note:'제로콜라 불가 · 일반 콜라'},
+      {n:'진간장', q:5, u:'큰술'},
+      {n:'소주', q:50, u:'ml', note:'반 컵'},
+      {n:'양파', q:1, u:'개'},
+      {n:'대파', q:1, u:'대'},
+      {n:'통마늘', q:8, u:'쪽'},
+      {n:'물', q:200, u:'ml'},
+      {n:'커피가루', q:1, u:'작은술'},
+      {n:'통후추', q:10, u:'알'}
+    ],
+    steps: [
+      '냄비에 콜라 500ml·물 200ml·진간장·양파·대파·마늘·커피가루·통후추를 넣고 끓어요.',
+      '끓기 시작하면 통삼겹 650g와 소주를 넣고 뚜껑을 열어 센불 10분 삶아요.',
+      '뚜껑을 닫고 중약불로 35분 삶고 중간에 한 번 뒤집어요.',
+      '불을 끄고 10분 뜸 들여요. 원하면 국물을 살짝 졸여도 좋아요.'
+    ],
+    tips: [
+      '콜라 탄산이 고기를 연하게 해줘요! 단짠 양념이 배어 김치 없이도 꿀맛이에요.',
+      '제로콜라는 단맛·욕기가 덜해 일반 콜라를 써요. 탄산은 끓이면 다 날아가요.',
+      '국물을 오래 졸이면 짜질 수 있어요. 35분 삶은 뒤 간을 보고 마무리해요.'
+    ]
   }
 ];
 
@@ -1726,8 +1861,11 @@ function renderRecipes(){
   const list = allRecipes();
   grid.innerHTML = list.map(function(r){
     const meta = (r.servings || 2) + '인분 기준 · ' + (r.steps ? r.steps.length : 0) + '단계 · ' + (r.time || '시간 미정');
+    const badge = r.img
+      ? '<span class="remoji hasimg"><img src="' + esc(r.img) + '" alt="" loading="lazy" decoding="async"></span>'
+      : '<span class="remoji">' + esc(r.emoji || '🍽️') + '</span>';
     return '<button type="button" class="rcard" data-recipe="' + r.id + '">' +
-      '<span class="remoji">' + esc(r.emoji || '🍽️') + '</span>' +
+      badge +
       '<span class="rb"><h3>' + esc(r.name) + '</h3>' +
       '<div class="rsub">' + esc(r.sub || '') + '</div>' +
       '<div class="rsub">' + esc(meta) + '</div>' +
@@ -1755,6 +1893,23 @@ function closeDetail(){
   currentDetailId = null;
 }
 
+function openZoom(){
+  const r = findRecipe(currentDetailId);
+  if (!r || !r.img) return;
+  const img = document.getElementById('zoomImg');
+  img.src = r.img;
+  img.alt = r.name + ' 레시피 카드';
+  document.getElementById('zoomView').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+function closeZoom(){
+  const zv = document.getElementById('zoomView');
+  if (!zv.classList.contains('on')) return;
+  zv.classList.remove('on');
+  document.getElementById('zoomImg').removeAttribute('src');
+  document.body.style.overflow = document.getElementById('detail').classList.contains('on') ? 'hidden' : '';
+}
+
 function fmtQty(v){
   const r = Math.round(v * 100) / 100;
   if (Math.abs(r - Math.round(r)) < 0.001) return String(Math.round(r));
@@ -1772,11 +1927,17 @@ function renderDetail(){
   const cur = detailServings[r.id] || r.servings || 2;
   const factor = cur / (r.servings || 2);
   const checks = state.ingChecks[r.id] || [];
-  const choices = Array.from(new Set([1, 2, 4, r.servings || 2, cur])).sort(function(a,b){ return a-b; });
+  const choices = Array.from(new Set([1, 2, 3, 4, r.servings || 2, cur])).sort(function(a,b){ return a-b; });
 
   let html = '<div class="rhero"><span class="remoji">' + esc(r.emoji || '🍽️') + '</span>' +
     '<div><h2>' + esc(r.name) + '</h2><div class="rsub">' + esc(r.sub || '') + '</div>' +
     '<div class="rsub">⏱ ' + esc(r.time || '시간 미정') + ' · 기본 ' + (r.servings || 2) + '인분</div></div></div>';
+
+  if (r.img) {
+    html += '<figure class="rphoto" data-zoom="1" role="button" tabindex="0" aria-label="레시피 카드 크게 보기">' +
+      '<img src="' + esc(r.img) + '" alt="' + esc(r.name) + ' 레시피 카드" decoding="async">' +
+      '<figcaption>🔍 탭하면 카드 전체를 크게 볼 수 있어요</figcaption></figure>';
+  }
 
   html += '<div class="servpick"><span class="subtle" style="font-weight:900">인분</span>' +
     choices.map(function(n){
@@ -2193,6 +2354,7 @@ function bindEvents(){
     }
     const ing = e.target.closest('[data-ing]');
     if (ing) { toggleIng(Number(ing.getAttribute('data-ing'))); return; }
+    if (e.target.closest('[data-zoom]')) { openZoom(); return; }
     if (e.target.closest('#resetChecks')) {
       state.ingChecks[currentDetailId] = [];
       save();
@@ -2201,6 +2363,10 @@ function bindEvents(){
   });
   document.getElementById('recipeSave').addEventListener('click', saveRecipeForm);
   document.getElementById('recipeDelete').addEventListener('click', deleteRecipe);
+  document.getElementById('zoomView').addEventListener('click', function(e){
+    if (e.target.closest('#zoomImg')) return;
+    closeZoom();
+  });
 
   document.getElementById('settingsBtn').addEventListener('click', openSettings);
   document.getElementById('openSettingsBtn').addEventListener('click', openSettings);
@@ -2266,6 +2432,7 @@ function bindEvents(){
   });
   document.addEventListener('keydown', function(e){
     if (e.key === 'Escape') {
+      if (document.getElementById('zoomView').classList.contains('on')) { closeZoom(); return; }
       const open = document.querySelector('.sheet.on');
       if (open) closeSheet(open.id.replace('Sheet',''));
       else if (document.getElementById('detail').classList.contains('on')) closeDetail();
