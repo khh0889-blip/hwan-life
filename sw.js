@@ -1,5 +1,5 @@
 /* 라이프 허브 오프라인 캐시 — 외부 요청 없이 이 파일들만 저장합니다. */
-const CACHE = 'hwan-life-v4';
+const CACHE = 'hwan-life-v5';
 const ASSETS = [
   './',
   './index.html',
